@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Agreement Signing</title>
+<style>
+  body { 
+    font-family: Arial, sans-serif; 
+    max-width: 500px; 
+    margin: 50px auto; 
+    padding: 20px;
+    background: #f5f5f5;
+  }
+  .container {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  h1 { 
+    text-align: center; 
+    color: #333; 
+    margin-bottom: 30px;
+  }
+  input { 
+    width: 100%; 
+    padding: 12px; 
+    margin-bottom: 15px; 
+    border: 1px solid #ddd; 
+    border-radius: 4px; 
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+  input:focus {
+    border-color: #4CAF50;
+    outline: none;
+  }
+  button { 
+    width: 100%; 
+    padding: 12px; 
+    background: #4CAF50; 
+    color: white; 
+    border: none; 
+    border-radius: 4px; 
+    font-size: 16px; 
+    cursor: pointer;
+  }
+  button:hover { 
+    background: #45a049; 
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Agreement Signing</h1>
+  <form id="signForm">
+    <input type="text" name="name" placeholder="Name" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <button type="submit">Send for signing</button>
+  </form>
+</div>
+
+
+<script>
+document.getElementById('signForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = Object.fromEntries(new FormData(e.target));
+  
+  // Send data to backend (which calls Adobe API)
+  const res = await fetch('/createAgreement', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formData)
+  });
+  
+  const data = await res.json();
+  
+  if (data.error) {
+    alert('Error: ' + data.error);
+    return;
+  }
+  
+  if (!data.signingUrl) {
+    alert('Error: Unable to get signing URL');
+    return;
+  }
+  
+  // Redirect to our signing page with the Adobe URL and agreement ID as parameters
+  window.location.href = `/sign.html?url=${encodeURIComponent(data.signingUrl)}&agreementId=${data.agreementId}`;
+});
+</script>
+</body>
+</html>

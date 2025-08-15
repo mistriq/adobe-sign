@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Agreement Signing</title>
+<style>
+  body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+  .header { text-align: center; margin-bottom: 20px; }
+  .sign-container { width: 100%; height: 80vh; border: 1px solid #ccc; }
+  .back-btn { margin-bottom: 10px; }
+  .back-btn a { color: #666; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="back-btn">
+  <a href="/">← Back to main page</a>
+</div>
+<div class="header">
+  <h2>Agreement Signing</h2>
+  <p>Please sign the document below:</p>
+</div>
+<iframe id="signFrame" class="sign-container" src="" frameborder="0"></iframe>
+
+<script>
+// Get parameters from URL
+const urlParams = new URLSearchParams(window.location.search);
+const signingUrl = urlParams.get('url');
+const agreementId = urlParams.get('agreementId');
+
+if (signingUrl && agreementId) {
+  document.getElementById('signFrame').src = decodeURIComponent(signingUrl);
+  
+  // Poll agreement status every 3 seconds
+  const pollInterval = setInterval(async () => {
+    try {
+      const response = await fetch(`/checkAgreementStatus/${agreementId}`);
+      const data = await response.json();
+      
+      
+      if (data.isSigned) {
+        clearInterval(pollInterval);
+        console.log('Document signed! Redirecting to success page...');
+        window.location.href = '/success';
+      }
+    } catch (error) {
+      console.error('Error checking status:', error);
+    }
+  }, 3000);
+  
+} else {
+  document.querySelector('.header').innerHTML = '<h2>Error</h2><p>No signing URL or agreement ID provided</p>';
+}
+</script>
+</body>
+</html>
